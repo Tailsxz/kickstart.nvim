@@ -143,7 +143,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup({
   { import = 'custom/plugins' },
-  require 'kickstart.plugins.debug',
+  -- require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line', --meh don't like it
   -- require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
