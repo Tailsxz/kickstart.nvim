@@ -174,6 +174,7 @@ return { -- LSP Configuration & Plugins
         --   },
         -- },
       },
+      jsonlint = {},
       --
       lua_ls = {
         -- cmd = {...},
@@ -199,6 +200,7 @@ return { -- LSP Configuration & Plugins
         },
       },
       cssmodules_ls = {},
+      stylelint = {},
       tailwindcss = {},
       marksman = {},
       emmet_language_server = {},

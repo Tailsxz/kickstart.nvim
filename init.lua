@@ -28,7 +28,9 @@ vim.opt.relativenumber = true
 -- vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
-vim.opt.mouse = 'a'
+-- vim.opt.mouse = 'a'
+
+vim.opt.termguicolors = true
 
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
@@ -92,7 +94,9 @@ end, { desc = 'Go to previous [D]iagnostic message' })
 vim.keymap.set('n', ']d', function()
   vim.diagnostic.jump { count = -1 }
 end, { desc = 'Go to next [D]iagnostic message' })
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
+vim.keymap.set('n', '<leader>e', function()
+  vim.diagnostic.open_float { border = 'rounded' }
+end, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier

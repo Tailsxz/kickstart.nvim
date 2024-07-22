@@ -59,7 +59,9 @@ return {
       local ui = require 'dapui'
       require('dapui').setup()
       require('dap-go').setup()
-      require('nvim-dap-virtual-text').setup()
+      require('nvim-dap-virtual-text').setup {
+        enabled = true,
+      }
       -- Handled by nvim-dap-go
       dap.adapters.go = {
         type = 'server',
@@ -88,22 +90,22 @@ return {
       --     },
       --   }
       -- end
-      dap.configurations.javascript = {
-        {
-          type = 'pwa-node',
-          request = 'launch',
-          name = 'Launch file',
-          program = '${file}',
-          cwd = '${workspaceFolder}',
-        },
-        {
-          type = 'pwa-node',
-          request = 'attach',
-          name = 'Attach',
-          processId = require('dap.utils').pick_process,
-          cwd = '${workspaceFolder}',
-        },
-      }
+      -- dap.configurations.javascript = {
+      --   {
+      --     type = 'pwa-node',
+      --     request = 'launch',
+      --     name = 'Launch file',
+      --     program = '${file}',
+      --     cwd = '${workspaceFolder}',
+      --   },
+      --   {
+      --     type = 'pwa-node',
+      --     request = 'attach',
+      --     name = 'Attach',
+      --     processId = require('dap.utils').pick_process,
+      --     cwd = '${workspaceFolder}',
+      --   },
+      -- }
 
       vim.keymap.set('n', '<space>b', dap.toggle_breakpoint)
       vim.keymap.set('n', '<space>gb', dap.run_to_cursor)
