@@ -155,9 +155,12 @@ return { -- LSP Configuration & Plugins
     --  - settings (table): Override the default settings passed when initializing the server.
     --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
     local servers = {
-      -- clangd = {},
+      clangd = {
+        filetypes = { 'c', 'cpp', 'arduino' },
+        root_dir = require('lspconfig').util.root_pattern('platformio.ini', '.clangd', '.git'),
+      },
       gopls = {},
-      -- pyright = {},
+      pyright = {},
       rust_analyzer = {},
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
       --
@@ -165,7 +168,7 @@ return { -- LSP Configuration & Plugins
       --    https://github.com/pmizio/typescript-tools.nvim
       --
       -- But for many setups, the LSP (`tsserver`) will work just fine
-      tsserver = {},
+      -- tsserver = {},
       --
       eslint = {
         -- rules = {
@@ -174,6 +177,8 @@ return { -- LSP Configuration & Plugins
         --   },
         -- },
       },
+      prettierd = {},
+      prettier = {},
       jsonlint = {},
       --
       lua_ls = {
@@ -205,7 +210,40 @@ return { -- LSP Configuration & Plugins
       marksman = {},
       emmet_language_server = {},
       svelte = {},
+      arduino_language_server = {
+        capabilities = {
+          textDocument = {
+            semanticTokens = vim.NIL,
+          },
+          workspace = {
+            semanticTokens = vim.NIL,
+          },
+        },
+        cmd = {
+          'arduino-language-server',
+          '-clangd',
+          '/usr/bin/clangd',
+          '-cli-config',
+          '/home/tailsxz/.arduino15/arduino-cli.yaml',
+          '-cli',
+          '/home/tailsxz/bin/arduino-cli',
+        },
+        filetypes = { 'arduino' },
+      },
     }
+
+    -- require('lspconfig').arduino_language_server.setup {
+    --   cmd = {
+    --     'arduino-language-server',
+    --     -- '-clangd',
+    --     -- '/usr/bin/clangd',
+    --     -- '-cli-config',
+    --     -- '/home/tailsxz/.arduino15/arduino-cli.yaml',
+    --     -- '-cli',
+    --     -- '/home/tailsxz/bin/arduino-cli',
+    --   },
+    --   filetypes = { 'arduino' },
+    -- }
 
     -- Ensure the servers and tools above are installed
     --  To check the current status of installed tools and/or manually install

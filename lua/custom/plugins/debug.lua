@@ -4,7 +4,49 @@ return {
     dependencies = {
       {
         'leoluz/nvim-dap-go',
-        'rcarriga/nvim-dap-ui',
+        {
+          'rcarriga/nvim-dap-ui',
+          opts = {
+            layouts = {
+              {
+                elements = {
+                  {
+                    id = 'scopes',
+                    size = 0.25,
+                  },
+                  {
+                    id = 'breakpoints',
+                    size = 0.25,
+                  },
+                  {
+                    id = 'stacks',
+                    size = 0.25,
+                  },
+                  {
+                    id = 'watches',
+                    size = 0.25,
+                  },
+                },
+                position = 'left',
+                size = 60,
+              },
+              {
+                elements = {
+                  {
+                    id = 'repl',
+                    size = 0.5,
+                  },
+                  {
+                    id = 'console',
+                    size = 0.5,
+                  },
+                },
+                position = 'bottom',
+                size = 20,
+              },
+            },
+          },
+        },
         'theHamsta/nvim-dap-virtual-text',
         'nvim-neotest/nvim-nio',
         'williamboman/mason.nvim',
@@ -34,22 +76,43 @@ return {
             'typescriptreact',
             'javascriptreact',
           } do
-            require('dap').configurations[language] = {
-              {
-                type = 'pwa-node',
-                request = 'launch',
-                name = 'Launch file',
-                program = '${file}',
-                cwd = '${workspaceFolder}',
-              },
-              {
-                type = 'pwa-node',
-                request = 'attach',
-                name = 'Attach',
-                processId = require('dap.utils').pick_process,
-                cwd = '${workspaceFolder}',
-              },
-            }
+            if language == 'typescript' then
+              require('dap').configurations['typescript'] = {
+                {
+                  type = 'pwa-node',
+                  request = 'launch',
+                  name = 'Launch file',
+                  program = '${file}',
+                  cwd = '${workspaceFolder}',
+                  runtimeExecutable = 'tsx',
+                },
+                {
+                  type = 'pwa-node',
+                  request = 'attach',
+                  name = 'Attach',
+                  processId = require('dap.utils').pick_process,
+                  cwd = '${workspaceFolder}',
+                  runtimeExecutable = 'tsx',
+                },
+              }
+            else
+              require('dap').configurations[language] = {
+                {
+                  type = 'pwa-node',
+                  request = 'launch',
+                  name = 'Launch file',
+                  program = '${file}',
+                  cwd = '${workspaceFolder}',
+                },
+                {
+                  type = 'pwa-node',
+                  request = 'attach',
+                  name = 'Attach',
+                  processId = require('dap.utils').pick_process,
+                  cwd = '${workspaceFolder}',
+                },
+              }
+            end
           end
         end,
       },
