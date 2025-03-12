@@ -141,6 +141,18 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+vim.api.nvim_create_autocmd('BufWritePre', {
+  pattern = { '*.lisp', '*.lsp', '*.scm' },
+  callback = function()
+    print 'hello from custom autocommand!'
+    local view = vim.fn.winsaveview()
+    vim.api.nvim_command 'normal! gg=G'
+    -- a little bonus, removing trailing whitespace :)
+    vim.api.nvim_command '%s/\\s\\+$//e'
+    vim.fn.winrestview(view)
+  end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
