@@ -13,6 +13,7 @@ return { -- LSP Configuration & Plugins
     -- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
     -- used for completion, annotations and signatures of Neovim apis
     { 'folke/neodev.nvim', opts = {} },
+    { 'hrsh7th/cmp-nvim-lsp' },
   },
   config = function()
     -- Brief aside: **What is LSP?**
@@ -168,9 +169,9 @@ return { -- LSP Configuration & Plugins
       --    https://github.com/pmizio/typescript-tools.nvim
       --
       -- But for many setups, the LSP (`tsserver`) will work just fine
-      -- tsserver = {
-      --   filetypes = 'js',
-      -- },
+      ts_ls = {
+        filetypes = { 'javascript', 'typescript' },
+      },
       --
       eslint = {
         -- rules = {

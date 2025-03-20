@@ -146,9 +146,9 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   callback = function()
     print 'hello from custom autocommand!'
     local view = vim.fn.winsaveview()
-    vim.api.nvim_command 'normal! gg=G'
+    vim.api.nvim_cmd({ cmd = 'normal', args = { 'gg=G' } }, {})
     -- a little bonus, removing trailing whitespace :)
-    vim.api.nvim_command '%s/\\s\\+$//e'
+    vim.api.nvim_cmd({ cmd = 'substitute', args = { '/\\s\\+$//e' }, range = { 1, vim.api.nvim_buf_line_count(0) } }, {})
     vim.fn.winrestview(view)
   end,
 })
@@ -191,5 +191,44 @@ require('lazy').setup({
     },
   },
 })
+
+local harpoon = require 'harpoon'
+harpoon:setup()
+
+vim.keymap.set('n', '<leader>a', function()
+  harpoon:list():add()
+  print 'added current buffer to harpoon list!'
+  vim.defer_fn(function()
+    print ''
+  end, 2000)
+end)
+vim.keymap.set('n', '<C-e>', function()
+  harpoon.ui:toggle_quick_menu(harpoon:list())
+end)
+
+vim.keymap.set('n', '<C-h>', function()
+  harpoon:list():select(1)
+end)
+vim.keymap.set('n', '<C-t>', function()
+  harpoon:list():select(2)
+end)
+vim.keymap.set('n', '<C-n>', function()
+  harpoon:list():select(3)
+end)
+vim.keymap.set('n', '<C-s>', function()
+  harpoon:list():select(4)
+end)
+
+-- Toggle previous & next buffers stored within Harpoon list
+vim.keymap.set('n', '<C-S-T>', function()
+  harpoon:list():prev()
+end)
+vim.keymap.set('n', '<C-S-H>', function()
+  harpoon:list():next()
+end)
+
+local harpoon_extensions = require 'harpoon.extensions'
+harpoon:extend(harpoon_extensions.builtins.highlight_current_file())
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
