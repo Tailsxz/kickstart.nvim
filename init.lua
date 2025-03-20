@@ -153,6 +153,22 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   end,
 })
 
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'scheme', 'lisp' },
+  callback = function()
+    local ap = require 'nvim-autopairs'
+    local quoteRule = ap.get_rule("'")[1]
+    local backquoteRule = ap.get_rule('`')[1]
+    if quoteRule then
+      quoteRule.not_filetypes = { 'scheme', 'lisp' }
+    end
+
+    if backquoteRule then
+      backquoteRule.not_filetypes = { 'scheme', 'lisp' }
+    end
+  end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
