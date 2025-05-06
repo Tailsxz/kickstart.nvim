@@ -166,9 +166,24 @@ vim.api.nvim_create_autocmd('FileType', {
     ap.get_rules("'")[1].not_filetypes = { 'scheme', 'lisp' }
     ap.get_rules('`')[1].not_filetypes = { 'scheme', 'lisp' }
 
+    local function move_if_next_char_is(char)
+      return function(opts)
+        return opts.line:sub(opts.col, opts.col) == char
+      end
+    end
+    local plus = '+'
+    local asterisk = '*'
     ap.add_rules {
-      Rule('*', '*', { 'lisp' }):with_pair(cond.not_before_regex '%('):with_pair(cond.not_inside_quote()):with_pair(ts_cond.is_not_ts_node { 'comment' }),
-      Rule('+', '+', { 'lisp' }):with_pair(cond.not_before_regex '%('):with_pair(cond.not_inside_quote()):with_pair(ts_cond.is_not_ts_node { 'comment' }),
+      Rule(asterisk, asterisk, { 'lisp' })
+        :with_pair(cond.not_before_regex '%(')
+        :with_pair(cond.not_inside_quote())
+        :with_pair(ts_cond.is_not_ts_node { 'comment' })
+        :with_move(move_if_next_char_is(asterisk)),
+      Rule(plus, plus, { 'lisp' })
+        :with_pair(cond.not_before_regex '%(')
+        :with_pair(cond.not_inside_quote())
+        :with_pair(ts_cond.is_not_ts_node { 'comment' })
+        :with_move(move_if_next_char_is(plus)),
     }
   end,
 })

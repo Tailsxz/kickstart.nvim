@@ -12,6 +12,7 @@ return {
       ts_config = {
         lisp = { 'string', 'comment' },
       },
+      enable_check_bracket_line = false,
     }
     -- If you want to automatically add `(` after selecting a function or method
     local cmp_autopairs = require 'nvim-autopairs.completion.cmp'
