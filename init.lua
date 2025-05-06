@@ -168,7 +168,7 @@ vim.api.nvim_create_autocmd('FileType', {
 
     local function move_if_next_char_is(char)
       return function(opts)
-        return opts.line:sub(opts.col, opts.col) == char
+        return opts.next_char == char
       end
     end
     local plus = '+'
