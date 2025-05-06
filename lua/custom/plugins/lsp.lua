@@ -170,7 +170,7 @@ return { -- LSP Configuration & Plugins
       --
       -- But for many setups, the LSP (`tsserver`) will work just fine
       ts_ls = {
-        filetypes = { 'javascript', 'typescript' },
+        filetypes = { 'javascript', 'typescript', 'javascriptreact', 'typescriptreact' },
       },
       --
       eslint = {

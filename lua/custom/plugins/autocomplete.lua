@@ -27,17 +27,19 @@ return { -- Autocompletion
       },
     },
     'saadparwaiz1/cmp_luasnip',
-
     -- Adds other completion capabilities.
     --  nvim-cmp does not ship with all sources by default. They are split
     --  into multiple repos for maintenance purposes.
-    'hrsh7th/cmp-nvim-lsp',
-    'hrsh7th/cmp-path',
     'hrsh7th/cmp-nvim-lsp-signature-help',
+    'hrsh7th/cmp-nvim-lsp',
+    'hrsh7th/cmp-nvim-lua',
+    'hrsh7th/cmp-buffer',
+    'hrsh7th/cmp-path',
   },
   config = function()
     -- See `:help cmp`
     local cmp = require 'cmp'
+    local lspkind = require 'lspkind'
     local luasnip = require 'luasnip'
     luasnip.config.setup {}
 
@@ -46,6 +48,40 @@ return { -- Autocompletion
         expand = function(args)
           luasnip.lsp_expand(args.body)
         end,
+      },
+      formatting = {
+        format = lspkind.cmp_format {
+          mode = 'symbol',
+          menu = {
+            buffer = '[buf]',
+            nvim_lsp = '[LSP]',
+            nvim_lua = '[api]',
+            path = '[path]',
+            luasnip = '[snip]',
+            gh_issues = '[issues]',
+          },
+          maxwidth = {
+            -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+            -- can also be a function to dynamically calculate max width such as
+            -- menu = function() return math.floor(0.45 * vim.o.columns) end,
+            -- menu = 50, -- leading text (labelDetails)
+            abbr = 12, -- actual suggestion item
+          },
+          -- show_labelDetails = true,
+          ellipsis_char = '...',
+        },
+      },
+      window = {
+        completion = cmp.config.window.bordered {
+          scrolloff = 5,
+          scrollbar = false,
+          side_padding = 1,
+          winhighlight = 'FloatBorder:Special,CursorLine:MyCursorLine',
+        },
+        documentation = cmp.config.window.bordered {
+          max_height = 30,
+          winhighlight = 'FloatBorder:Special',
+        },
       },
       completion = { completeopt = 'menu,menuone,noinsert' },
 
@@ -79,34 +115,30 @@ return { -- Autocompletion
         --  completions whenever it has completion options available.
         ['<C-Space>'] = cmp.mapping.complete {},
 
-        -- Think of <c-l> as moving to the right of your snippet expansion.
-        --  So if you have a snippet that's like:
-        --  function $name($args)
-        --    $body
-        --  end
-        --
-        -- <c-l> will move you to the right of each of the expansion locations.
-        -- <c-h> is similar, except moving you backwards.
-        ['<C-l>'] = cmp.mapping(function()
+        ['<C-k>'] = cmp.mapping(function()
           if luasnip.expand_or_locally_jumpable() then
             luasnip.expand_or_jump()
           end
         end, { 'i', 's' }),
-        ['<C-h>'] = cmp.mapping(function()
+        ['<C-j>'] = cmp.mapping(function()
           if luasnip.locally_jumpable(-1) then
             luasnip.jump(-1)
           end
         end, { 'i', 's' }),
-
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
       },
       sources = {
-        { name = 'nvim_lsp' },
         { name = 'nvim_lsp_signature_help' },
+        { name = 'nvim_lsp' },
         { name = 'luasnip' },
+        { name = 'nvim_lua' },
         { name = 'path' },
+        { name = 'buffer', keyword_length = 5 },
       },
+      -- experimental = {
+      --   ghost_text = true,
+      -- },
     }
   end,
 }

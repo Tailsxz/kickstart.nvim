@@ -79,8 +79,11 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
--- Replace lambda with symbol! :)
+-- Conceal things! Specifically for replacing the word lambda with it's symbol! :)
 vim.opt.conceallevel = 2
+
+-- wrap will wrap in the middle of words, linebreak will wrap the entire
+vim.opt.linebreak = true
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -157,15 +160,16 @@ vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'scheme', 'lisp' },
   callback = function()
     local ap = require 'nvim-autopairs'
-    local quoteRule = ap.get_rule("'")[1]
-    local backquoteRule = ap.get_rule('`')[1]
-    if quoteRule then
-      quoteRule.not_filetypes = { 'scheme', 'lisp' }
-    end
+    local Rule = require 'nvim-autopairs.rule'
+    local cond = require 'nvim-autopairs.conds'
+    local ts_cond = require 'nvim-autopairs.ts-conds'
+    ap.get_rules("'")[1].not_filetypes = { 'scheme', 'lisp' }
+    ap.get_rules('`')[1].not_filetypes = { 'scheme', 'lisp' }
 
-    if backquoteRule then
-      backquoteRule.not_filetypes = { 'scheme', 'lisp' }
-    end
+    ap.add_rules {
+      Rule('*', '*', { 'lisp' }):with_pair(cond.not_before_regex '%('):with_pair(cond.not_inside_quote()):with_pair(ts_cond.is_not_ts_node { 'comment' }),
+      Rule('+', '+', { 'lisp' }):with_pair(cond.not_before_regex '%('):with_pair(cond.not_inside_quote()):with_pair(ts_cond.is_not_ts_node { 'comment' }),
+    }
   end,
 })
 

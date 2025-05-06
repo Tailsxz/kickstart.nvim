@@ -6,3 +6,7 @@ vim.api.nvim_create_autocmd('FileType', {
         ]]
   end,
 })
+vim.cmd [[
+  highlight MyCursorLine guifg=#00DDEE guibg=#110033 |
+  highlight CmpItemMenu guifg=#225599 ctermfg=Yellow
+]]
