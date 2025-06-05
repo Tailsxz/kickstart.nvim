@@ -130,6 +130,12 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 
 vim.g.undotree_SetFocusWhenToggle = 1
 vim.keymap.set('n', '<leader>ud', vim.cmd.UndotreeToggle, { desc = 'Toggle Undotree UI' })
+
+-- Remove \r for windows pastes.
+vim.keymap.set('n', '<leader>pc', function()
+  vim.cmd [['[,']s/\r//ge]]
+end, { desc = 'Remove Returns on Previously Changed Text' })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -145,9 +151,8 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 })
 
 vim.api.nvim_create_autocmd('BufWritePre', {
-  pattern = { '*.lisp', '*.lsp', '*.scm' },
+  pattern = { '*.lisp', '*.lsp', '*.scm', '.clojure', '.clj' },
   callback = function()
-    print 'hello from custom autocommand!'
     local view = vim.fn.winsaveview()
     vim.api.nvim_cmd({ cmd = 'normal', args = { 'gg=G' } }, {})
     -- a little bonus, removing trailing whitespace :)
@@ -163,8 +168,8 @@ vim.api.nvim_create_autocmd('FileType', {
     local Rule = require 'nvim-autopairs.rule'
     local cond = require 'nvim-autopairs.conds'
     local ts_cond = require 'nvim-autopairs.ts-conds'
-    ap.get_rules("'")[1].not_filetypes = { 'scheme', 'lisp' }
-    ap.get_rules('`')[1].not_filetypes = { 'scheme', 'lisp' }
+    ap.get_rules("'")[1].not_filetypes = { 'scheme', 'lisp', 'clojure' }
+    ap.get_rules('`')[1].not_filetypes = { 'scheme', 'lisp', 'clojure' }
 
     local function move_if_next_char_is(char)
       return function(opts)
@@ -176,11 +181,15 @@ vim.api.nvim_create_autocmd('FileType', {
     ap.add_rules {
       Rule(asterisk, asterisk, { 'lisp' })
         :with_pair(cond.not_before_regex '%(')
+        :with_pair(cond.not_before_regex '1')
+        :with_pair(cond.not_before_regex 'let')
+        :with_pair(cond.not_before_regex 'list')
         :with_pair(cond.not_inside_quote())
         :with_pair(ts_cond.is_not_ts_node { 'comment' })
         :with_move(move_if_next_char_is(asterisk)),
       Rule(plus, plus, { 'lisp' })
         :with_pair(cond.not_before_regex '%(')
+        :with_pair(cond.not_before_regex '1')
         :with_pair(cond.not_inside_quote())
         :with_pair(ts_cond.is_not_ts_node { 'comment' })
         :with_move(move_if_next_char_is(plus)),

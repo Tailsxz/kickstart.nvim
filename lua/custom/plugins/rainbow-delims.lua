@@ -1,1 +1,1 @@
-return { 'hiphish/rainbow-delimiters.nvim', ft = { 'lisp', 'scheme' } }
+return { 'hiphish/rainbow-delimiters.nvim', ft = { 'lisp', 'scheme', 'clojure' } }
