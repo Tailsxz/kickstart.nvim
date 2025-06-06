@@ -49,7 +49,7 @@ return {
         },
         'theHamsta/nvim-dap-virtual-text',
         'nvim-neotest/nvim-nio',
-        'williamboman/mason.nvim',
+        'mason-org/mason.nvim',
       },
     },
     config = function()

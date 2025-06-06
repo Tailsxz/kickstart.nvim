@@ -12,85 +12,87 @@ vim.g.have_nerd_font = true
 --Preventing override of tabstop and shiftwidth
 vim.g.markdown_recommended_style = 0
 
--- [[ Setting options ]]
--- See `:help vim.opt`
--- NOTE: You can change these options as you wish!
---  For more options, you can see `:help option-list`
+-- [[ Setting oions ]]
+-- See `:help vim.o`
+-- NOTE: You can change these oions as you wish!
+--  For more oions, you can see `:help oion-list`
 
-vim.opt.shiftwidth = 2
-vim.opt.tabstop = 2
+vim.o.shiftwidth = 2
+vim.o.tabstop = 2
 
 -- Make line numbers default
-vim.opt.number = true
-vim.opt.relativenumber = true
+vim.o.number = true
+vim.o.relativenumber = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+-- vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
--- vim.opt.mouse = 'a'
+vim.o.mouse = 'a'
 
-vim.opt.termguicolors = true
+vim.o.termguicolors = true
 
 -- Don't show the mode, since it's already in the status line
-vim.opt.showmode = false
+vim.o.showmode = false
 
 -- Sync clipboard between OS and Neovim.
---  Remove this option if you want your OS clipboard to remain independent.
+--  Remove this oion if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
-vim.opt.clipboard = 'unnamedplus'
+vim.schedule(function()
+  vim.o.clipboard = 'unnamedplus'
+end)
 
 -- Enable break indent
-vim.opt.breakindent = true
+vim.o.breakindent = true
 
 -- Save undo history
-vim.opt.undofile = true
+vim.o.undofile = true
 
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
+vim.o.ignorecase = true
+vim.o.smartcase = true
 
 -- Keep signcolumn on by default
-vim.opt.signcolumn = 'yes'
+vim.o.signcolumn = 'yes'
 
 -- Decrease update time
-vim.opt.updatetime = 250
+vim.o.updatetime = 250
 
 -- Decrease mapped sequence wait time
 -- Displays which-key popup sooner
-vim.opt.timeoutlen = 300
+vim.o.timeoutlen = 300
 
 -- Configure how new splits should be opened
-vim.opt.splitright = true
-vim.opt.splitbelow = true
+vim.o.splitright = true
+vim.o.splitbelow = true
 
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
 --  and `:help 'listchars'`
-vim.opt.list = true
+vim.o.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
 -- Preview substitutions live, as you type!
-vim.opt.inccommand = 'split'
+vim.o.inccommand = 'split'
 
 -- Show which line your cursor is on
-vim.opt.cursorline = true
+vim.o.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 10
+vim.o.scrolloff = 10
 
 -- Conceal things! Specifically for replacing the word lambda with it's symbol! :)
-vim.opt.conceallevel = 2
+vim.o.conceallevel = 2
 
 -- wrap will wrap in the middle of words, linebreak will wrap the entire
-vim.opt.linebreak = true
+vim.o.linebreak = true
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 vim.keymap.set('n', '<leader>pv', '<cmd>:Ex<CR>')
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
-vim.opt.hlsearch = true
+vim.o.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
@@ -128,6 +130,7 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+-- Undotree
 vim.g.undotree_SetFocusWhenToggle = 1
 vim.keymap.set('n', '<leader>ud', vim.cmd.UndotreeToggle, { desc = 'Toggle Undotree UI' })
 
@@ -172,8 +175,8 @@ vim.api.nvim_create_autocmd('FileType', {
     ap.get_rules('`')[1].not_filetypes = { 'scheme', 'lisp', 'clojure' }
 
     local function move_if_next_char_is(char)
-      return function(opts)
-        return opts.next_char == char
+      return function(os)
+        return os.next_char == char
       end
     end
     local plus = '+'
@@ -200,11 +203,17 @@ vim.api.nvim_create_autocmd('FileType', {
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
-if not vim.loop.fs_stat(lazypath) then
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
-  vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
-end ---@diagnostic disable-next-line: undefined-field
-vim.opt.rtp:prepend(lazypath)
+  local out = vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
+  if vim.v.shell_error ~= 0 then
+    error('Error cloning lazy.nvim:\n' .. out)
+  end
+end
+
+--@type vim.Option
+local rtp = vim.opt.rtp
+rtp:prepend(lazypath)
 
 require('lazy').setup({
   { import = 'custom/plugins' },
