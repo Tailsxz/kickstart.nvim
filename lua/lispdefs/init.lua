@@ -1,6 +1,6 @@
---- @module 'blink.cmp'
+--- @module 'lispdefs'
 --- @class blink.cmp.Source
-local lisp_funcs = require 'lisp_funcs'
+local lisp_funcs = require 'lispdefs.lisp_funcs'
 local source = {}
 
 function source.new(opts)
