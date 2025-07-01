@@ -58,7 +58,7 @@ return { -- LSP Configuration & Plugins
         -- Rename the variable under your cursor.
         map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
 
-        -- Rename the variable under your cursor.
+        -- Code action under cursor! Should be hovering over an error.
         map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', {
           'n',
           'x',
