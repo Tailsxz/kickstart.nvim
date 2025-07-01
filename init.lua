@@ -191,6 +191,7 @@ vim.api.nvim_create_autocmd('FileType', {
         :with_pair(ts_cond.is_not_ts_node { 'comment' })
         :with_move(move_if_next_char_is(asterisk)),
       Rule(plus, plus, { 'lisp' })
+        :with_pair(cond.not_before_regex '#')
         :with_pair(cond.not_before_regex '%(')
         :with_pair(cond.not_before_regex '1')
         :with_pair(cond.not_inside_quote())
