@@ -76,8 +76,26 @@ return { -- Autocompletion
     },
 
     sources = {
+      default = function()
+        local success, node = pcall(vim.treesitter.get_node)
+        if success and node and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }, node:type()) then
+          return { 'buffer' }
+        elseif vim.bo.filetype == 'lisp' then
+          return { 'lispdefs', 'path', 'lazydev' }
+        else
+          return { 'lsp', 'path', 'snippets', 'lazydev' }
+        end
+      end,
       providers = {
+        buffer = {
+          max_items = 5, -- Maximum number of items to display in the menu
+          min_keyword_length = 6, -- Minimum number of characters in the keyword to trigger the provider
+        },
         lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
+        lispdefs = {
+          name = 'Lisp',
+          module = 'lispdefs',
+        },
       },
     },
 
