@@ -80,8 +80,8 @@ return { -- Autocompletion
         local success, node = pcall(vim.treesitter.get_node)
         if success and node and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }, node:type()) then
           return { 'buffer' }
-        elseif vim.bo.filetype == 'lisp' then
-          return { 'lispdefs', 'path', 'lazydev' }
+        elseif vim.bo.filetype == 'lisp' and node and node:type() ~= 'str_lit' then
+          return { 'lispdefs', 'path', 'lazydev', 'buffer' }
         else
           return { 'lsp', 'path', 'snippets', 'lazydev' }
         end

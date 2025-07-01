@@ -1,6 +1,7 @@
 --- @module 'lispdefs'
 --- @class blink.cmp.Source
 local lisp_funcs = require 'lispdefs.lisp_funcs'
+local lisp_constants = require 'lispdefs.lisp_constants'
 local source = {}
 
 function source.new(opts)
@@ -25,6 +26,15 @@ function source:get_completions(_, callback)
     local item = {
       label = v,
       kind = require('blink.cmp.types').CompletionItemKind.Function,
+    }
+    table.insert(items, item)
+  end
+
+  for _, v in pairs(lisp_constants) do
+    --- @type lsp.CompletionItem
+    local item = {
+      label = v,
+      kind = require('blink.cmp.types').CompletionItemKind.Variable,
     }
     table.insert(items, item)
   end
