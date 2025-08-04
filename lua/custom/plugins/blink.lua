@@ -20,12 +20,12 @@ return { -- Autocompletion
         -- `friendly-snippets` contains a variety of premade snippets.
         --    See the README about individual language/framework/plugin snippets:
         --    https://github.com/rafamadriz/friendly-snippets
-        -- {
-        --   'rafamadriz/friendly-snippets',
-        --   config = function()
-        --     require('luasnip.loaders.from_vscode').lazy_load()
-        --   end,
-        -- },
+        {
+          'rafamadriz/friendly-snippets',
+          config = function()
+            require('luasnip.loaders.from_vscode').lazy_load()
+          end,
+        },
       },
       opts = {},
     },
@@ -78,28 +78,57 @@ return { -- Autocompletion
     sources = {
       default = function()
         local success, node = pcall(vim.treesitter.get_node)
-        if success and node and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }, node:type()) then
-          return { 'buffer' }
-        elseif vim.bo.filetype == 'lisp' and node and node:type() ~= 'str_lit' then
-          return { 'lispdefs', 'path', 'lazydev', 'buffer' }
-        else
-          return { 'lsp', 'path', 'snippets', 'lazydev' }
+        local sources = {
+          'lsp',
+          'path',
+          'snippets',
+          'lazydev',
+        }
+
+        if node ~= nil then
+          local buf_file_type = vim.bo.filetype
+          local node_type = node:type()
+
+          if success and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }, node_type) then
+            return { 'buffer' }
+          end
+
+          if buf_file_type == 'lisp' and node:type() ~= 'str_lit' then
+            table.insert(sources, 'lispdefs')
+          end
+
+          if vim.tbl_contains({ 'lisp', 'css' }, buf_file_type) then
+            table.insert(sources, 'buffer')
+          end
         end
+        return sources
       end,
       providers = {
         buffer = {
           max_items = 5, -- Maximum number of items to display in the menu
           min_keyword_length = 6, -- Minimum number of characters in the keyword to trigger the provider
         },
+        lsp = {
+          score_offset = 101,
+        },
         lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
         lispdefs = {
           name = 'Lisp',
           module = 'lispdefs',
         },
+        snippets = {
+          name = 'snippets',
+          enabled = true,
+          max_items = 5,
+          min_keyword_length = 2,
+          module = 'blink.cmp.sources.snippets',
+          score_offset = -100, -- the higher the number, the higher the priority
+        },
       },
     },
-
-    snippets = { preset = 'luasnip' },
+    snippets = {
+      preset = 'luasnip',
+    },
 
     -- Blink.cmp includes an optional, recommended rust fuzzy matcher,
     -- which automatically downloads a prebuilt binary when enabled.
