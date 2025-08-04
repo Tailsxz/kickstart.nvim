@@ -1,7 +1,7 @@
 --- @module 'lispdefs'
 --- @class blink.cmp.Source
 local lisp_funcs = require 'lispdefs.lisp_funcs'
-local lisp_constants = require 'lispdefs.lisp_constants'
+local lisp_variables = require 'lispdefs.lisp_variables'
 local source = {}
 
 function source.new(opts)
@@ -30,7 +30,7 @@ function source:get_completions(_, callback)
     table.insert(items, item)
   end
 
-  for _, v in pairs(lisp_constants) do
+  for _, v in pairs(lisp_variables) do
     --- @type lsp.CompletionItem
     local item = {
       label = v,
