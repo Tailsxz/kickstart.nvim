@@ -76,7 +76,7 @@ return {
         port = '${port}',
         executable = {
           command = 'node',
-          args = { '/home/tailsxz/.local/share/nvim/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js', '${port}' },
+          args = { '/home/tailsxz/misc/js-debug/src/dapDebugServer.js', '${port}' },
         },
       }
 
@@ -121,10 +121,10 @@ return {
         {
           type = 'pwa-node',
           request = 'launch',
-          name = 'TSX',
+          name = 'ANALYZE PROGRAM',
           program = '${file}',
           cwd = '${workspaceFolder}',
-          runtimeExecutable = '${workspaceFolder}/node_modules/.bin/tsx',
+          runtimeExecutable = '/home/tailsxz/.local/share/pnpm/tsx',
           skipFiles = {
             '<node_internals>/**',
             '${workspaceFolder}/node_modules/**',
@@ -137,7 +137,7 @@ return {
           name = 'Attach to tsx process',
           processId = require('dap.utils').pick_process,
           cwd = '${workspaceFolder}',
-          runtimeExecutable = '${workspaceFolder}/node_modules/.bin/tsx',
+          runtimeExecutable = '/home/tailsxz/.local/share/pnpm/tsx',
           skipFiles = {
             '<node_internals>/**',
             '${workspaceFolder}/node_modules/**',
