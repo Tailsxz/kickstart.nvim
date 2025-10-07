@@ -2,6 +2,8 @@ vim.opt_local.expandtab = true
 vim.opt_local.softtabstop = 2
 vim.opt_local.shiftwidth = 2
 
+--- Searches up the tree of a node in an attempt to find the node which is a direct child of the root node, source, and returns it. This will be the list_lit node in the context of searching within a definition form. I.e. (defmacro foo () ...)
+---
 ---@param node TSNode
 ---@return TSNode?
 local function find_root_form_parent(node)
@@ -26,6 +28,8 @@ local function find_root_form_parent(node)
   return crawl(node)
 end
 
+--- Returns the node whose type matches target_type, nil if not found.
+---
 ---@param root TSNode
 ---@param target_type string
 ---@return TSNode?
@@ -44,6 +48,8 @@ local function find_named_child_of_type(root, target_type)
   end
 end
 
+--- Takes the root node of a lisp form. If it is a definitional form, according to the Common Lisp grammar, then returns the name of the definition. Otherwise, returns an empty string.
+---
 ---@param root TSNode
 local function find_function_name(root)
   local buffer = vim.api.nvim_get_current_buf()
