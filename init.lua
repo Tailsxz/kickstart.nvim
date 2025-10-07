@@ -12,10 +12,10 @@ vim.g.have_nerd_font = true
 --Preventing override of tabstop and shiftwidth
 vim.g.markdown_recommended_style = 0
 
--- [[ Setting oions ]]
+-- [[ Setting options ]]
 -- See `:help vim.o`
--- NOTE: You can change these oions as you wish!
---  For more oions, you can see `:help oion-list`
+-- NOTE: You can change these options as you wish!
+--  For more options, you can see `:help option-list`
 
 vim.o.shiftwidth = 2
 vim.o.tabstop = 2
