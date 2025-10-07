@@ -7,6 +7,7 @@ return {
     vim.g['conjure#log#wrap'] = true
     vim.g['conjure#filetypes'] = {
       'lisp',
+      'scheme',
     }
   end,
 }
