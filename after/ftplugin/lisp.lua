@@ -69,6 +69,7 @@ local function find_function_name(root)
 end
 
 vim.keymap.set('n', '<leader>e', '<nop>', {})
+
 vim.keymap.set('n', '<leader>lw', function()
   local node = vim.treesitter.get_node()
   if node ~= nil then
@@ -85,3 +86,45 @@ vim.keymap.set('n', '<leader>lw', function()
 
   print 'Failed to add definition to lispwords...\nAre you within a definitional form?'
 end, { desc = 'Add symbol to lispwords.', remap = true })
+
+---@param string string
+local function string_to_lisp_symbol_dict(string)
+  local dict = {}
+  for word in string:gmatch '[^%s]+' do
+    table.insert(dict, word)
+  end
+  return dict
+end
+
+vim.keymap.set('n', '<leader>ac', function()
+  local program =
+    '(let ((cl-package (find-package :cl))) (format nil "~{~(~a~^ ~)~}" (nconc (loop for x being the external-symbols of *package* collect x) (loop for package in (remove-if #\'(lambda (package) (eql package cl-package)) (package-use-list *package*)) nconc (loop for x being the external-symbols of package collect x)))))'
+
+  vim.api.nvim_cmd({ cmd = 'ConjureEval', args = { program } }, {})
+  vim.api.nvim_create_autocmd({ 'User' }, {
+    pattern = { 'ConjureEval' },
+    once = true,
+    callback = function(_)
+      vim.schedule(function()
+        local result_string = (vim.fn.getreg 'c'):match '"(.*)"'
+
+        if result_string == nil then
+          return
+        end
+
+        local symbols = string_to_lisp_symbol_dict(result_string)
+        local items = Lispdef_items
+
+        local blink_types = require 'blink.cmp.types'
+        for _, v in pairs(symbols) do
+          --- @type lsp.CompletionItem
+          local item = {
+            label = v,
+            kind = blink_types.CompletionItemKind.Function,
+          }
+          table.insert(items, item)
+        end
+      end)
+    end,
+  })
+end, { desc = 'Adds all external and inherited symbols of the current *package* to the autocomplete lispdefs table.' })

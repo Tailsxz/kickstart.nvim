@@ -284,5 +284,7 @@ end)
 local harpoon_extensions = require 'harpoon.extensions'
 harpoon:extend(harpoon_extensions.builtins.highlight_current_file())
 
+Lispdef_items = {}
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

@@ -2,7 +2,27 @@
 --- @class blink.cmp.Source
 local lisp_funcs = require 'lispdefs.lisp_funcs'
 local lisp_variables = require 'lispdefs.lisp_variables'
+local blink_types = require 'blink.cmp.types'
 local source = {}
+
+---@param dest lsp.CompletionItem[]
+---@param entries string[]
+---@param type number
+local function insert_entries_as_type(dest, entries, type)
+  for _, v in pairs(entries) do
+    --- @type lsp.CompletionItem
+    local item = {
+      label = v,
+      kind = type,
+    }
+    table.insert(dest, item)
+  end
+end
+
+--- @type lsp.CompletionItem[]
+local items = Lispdef_items
+insert_entries_as_type(items, lisp_funcs, blink_types.CompletionItemKind.Function)
+insert_entries_as_type(items, lisp_variables, blink_types.CompletionItemKind.Variable)
 
 function source.new(opts)
   local self = setmetatable({}, { __index = source })
@@ -19,26 +39,6 @@ function source:get_trigger_characters()
 end
 
 function source:get_completions(_, callback)
-  --- @type lsp.CompletionItem[]
-  local items = {}
-  for _, v in pairs(lisp_funcs) do
-    --- @type lsp.CompletionItem
-    local item = {
-      label = v,
-      kind = require('blink.cmp.types').CompletionItemKind.Function,
-    }
-    table.insert(items, item)
-  end
-
-  for _, v in pairs(lisp_variables) do
-    --- @type lsp.CompletionItem
-    local item = {
-      label = v,
-      kind = require('blink.cmp.types').CompletionItemKind.Variable,
-    }
-    table.insert(items, item)
-  end
-
   callback {
     items = items,
     is_incomplete_backward = true,

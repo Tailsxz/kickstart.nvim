@@ -1,20 +1,4 @@
 return {
-  '%make-simd-pack-256-double',
-  '%make-simd-pack-256-single',
-  '%make-simd-pack-256-ub32',
-  '%make-simd-pack-256-ub64',
-  '%make-simd-pack-double',
-  '%make-simd-pack-single',
-  '%make-simd-pack-ub32',
-  '%make-simd-pack-ub64',
-  '%simd-pack-256-doubles',
-  '%simd-pack-256-singles',
-  '%simd-pack-256-ub32s',
-  '%simd-pack-256-ub64s',
-  '%simd-pack-doubles',
-  '%simd-pack-singles',
-  '%simd-pack-ub32s',
-  '%simd-pack-ub64s',
   '*',
   '*',
   '+',
@@ -952,4 +936,3 @@ return {
   'yes-or-no-p',
   'zerop',
 }
-
