@@ -28,7 +28,7 @@ local function find_root_form_parent(node)
   return crawl(node)
 end
 
---- Returns the node whose type matches target_type, nil if not found.
+--- Returns the child node whose type matches target_type, nil if not found.
 ---
 ---@param root TSNode
 ---@param target_type string
@@ -84,7 +84,22 @@ vim.keymap.set('n', '<leader>lw', function()
     end
   end
 
-  print 'Failed to add definition to lispwords...\nAre you within a definitional form?'
+  -- fallback logic
+  local line = vim.api.nvim_get_current_line()
+  local symbol = line:match '^%s*%(([^%s]+)'
+
+  -- matched definition macro,
+  if vim.tbl_contains({ 'defun', 'defmacro' }, symbol) then
+    -- try another match after the definition symbol + 1 for paren + 1 for space.
+    symbol = line:match('^[^%s]+', symbol:len() + 3)
+  end
+
+  if symbol ~= nil then
+    vim.opt.lispwords:append(symbol)
+    print('Added ' .. symbol .. ' to lispwords!')
+  else
+    print 'Failed to find symbol to add to lispwords...'
+  end
 end, { desc = 'Add symbol to lispwords.', remap = true })
 
 ---@param string string
