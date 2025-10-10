@@ -39,6 +39,20 @@ function source:get_trigger_characters()
 end
 
 function source:get_completions(_, callback)
+  local hash = {}
+  local unique_items = {}
+  ---@type table
+  for _, v in pairs(items) do
+    local sym = v['label']
+    if not hash[sym] then
+      hash[sym] = true
+      table.insert(unique_items, v)
+    end
+  end
+
+  Lispdef_items = unique_items
+  items = unique_items
+
   callback {
     items = items,
     is_incomplete_backward = true,
