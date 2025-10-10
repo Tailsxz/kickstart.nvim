@@ -103,39 +103,51 @@ vim.keymap.set('n', '<leader>lw', function()
 end, { desc = 'Add symbol to lispwords.', remap = true })
 
 ---@param string string
-local function string_to_lisp_symbol_dict(string)
+local function string_to_lisp_symbol_pair_list(string)
   local dict = {}
-  for word in string:gmatch '[^%s]+' do
-    table.insert(dict, word)
+  for pair in string:gmatch '{(.-)}' do
+    table.insert(dict, pair)
   end
   return dict
 end
 
-vim.keymap.set('n', '<leader>ac', function()
-  local program =
-    '(let ((cl-package (find-package :cl))) (format nil "~{~(~a~^ ~)~}" (nconc (loop for x being the external-symbols of *package* collect x) (loop for package in (remove-if #\'(lambda (package) (eql package cl-package)) (package-use-list *package*)) nconc (loop for x being the external-symbols of package collect x)))))'
+---@param pair string
+---@return string, string
+local function pair_to_values(pair)
+  local sym = pair:match '%S+'
+  local pkg = pair:match('%S+', sym:len() + 1)
+  return sym, pkg
+end
 
+local program =
+  '(let ((cl-package (find-package :cl))) (unless (eql *package* (find-package :cl-user)) (format nil "~{~{{~(~a~^ ~a~)}~}~^ ~}" (nconc (loop for x being the external-symbols of *package* collect (list x (package-name (symbol-package x)))) (loop for package in (remove-if #\'(lambda (package) (eql package cl-package)) (package-use-list *package*)) nconc (loop for x being the external-symbols of package collect (list x (package-name (symbol-package x)))))))))'
+
+--- TODO: Format directly to lua tables and load()!! Would be very nice. Then we can have additional logic like fboundp, describe, etc, to have much more information that we can easily work with here!
+vim.keymap.set('n', '<leader>ac', function()
   vim.api.nvim_cmd({ cmd = 'ConjureEval', args = { program } }, {})
   vim.api.nvim_create_autocmd({ 'User' }, {
     pattern = { 'ConjureEval' },
     once = true,
     callback = function(_)
+      --- required as it doesn't seem that after the ConjureEval event, which is said to fire after evaluation of any form, that the contents are placed in the clipboard immediately. Even with the schedule it is inconsistent.
       vim.schedule(function()
         local result_string = (vim.fn.getreg 'c'):match '"(.*)"'
 
-        if result_string == nil then
+        if result_string == nil or result_string:sub(0, 1) ~= '{' then
           return
         end
 
-        local symbols = string_to_lisp_symbol_dict(result_string)
+        local symbols = string_to_lisp_symbol_pair_list(result_string)
         local items = Lispdef_items
 
         local blink_types = require 'blink.cmp.types'
-        for _, v in pairs(symbols) do
+        for _, pair in pairs(symbols) do
+          local sym, pkg = pair_to_values(pair)
           --- @type lsp.CompletionItem
           local item = {
-            label = v,
+            label = sym,
             kind = blink_types.CompletionItemKind.Function,
+            detail = string.format('package: %s', pkg),
           }
           table.insert(items, item)
         end
