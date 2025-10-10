@@ -120,7 +120,7 @@ local function pair_to_values(pair)
 end
 
 local program =
-  '(let ((cl-package (find-package :cl))) (unless (eql *package* (find-package :cl-user)) (format nil "~{~{{~(~a~^ ~a~)}~}~^ ~}" (nconc (loop for x being the external-symbols of *package* collect (list x (package-name (symbol-package x)))) (loop for package in (remove-if #\'(lambda (package) (eql package cl-package)) (package-use-list *package*)) nconc (loop for x being the external-symbols of package collect (list x (package-name (symbol-package x)))))))))'
+  '(let ((cl-package (find-package :cl))) (unless (eql *package* (find-package :cl-user)) (format nil "~{~{{~(~a~^ ~a~)}~}~^ ~}" (nconc (loop for x being the present-symbols of *package* collect (list x (package-name (symbol-package x)))) (loop for package in (remove-if #\'(lambda (package) (eql package cl-package)) (package-use-list *package*)) nconc (loop for x being the external-symbols of package collect (list x (package-name (symbol-package x)))))))))'
 
 --- TODO: Format directly to lua tables and load()!! Would be very nice. Then we can have additional logic like fboundp, describe, etc, to have much more information that we can easily work with here!
 vim.keymap.set('n', '<leader>ac', function()
