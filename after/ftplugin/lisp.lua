@@ -103,26 +103,20 @@ vim.keymap.set('n', '<leader>lw', function()
 end, { desc = 'Add symbol to lispwords.', remap = true })
 
 ---@param string string
-local function string_to_lisp_symbol_pair_list(string)
+local function string_to_items(string)
   local dict = {}
-  for pair in string:gmatch '{(.-)}' do
-    table.insert(dict, pair)
+  for item_string in string:gmatch '%b{}' do
+    local _, program = pcall(load, 'return ' .. item_string)
+    if program then
+      table.insert(dict, program())
+    end
   end
   return dict
 end
 
----@param pair string
----@return string, string
-local function pair_to_values(pair)
-  local sym = pair:match '%S+'
-  local pkg = pair:match('%S+', sym:len() + 1)
-  return sym, pkg
-end
-
 local program =
-  '(let ((cl-package (find-package :cl))) (unless (eql *package* (find-package :cl-user)) (format nil "~{~{{~(~a~^ ~a~)}~}~^ ~}" (nconc (loop for x being the present-symbols of *package* collect (list x (package-name (symbol-package x)))) (loop for package in (remove-if #\'(lambda (package) (eql package cl-package)) (package-use-list *package*)) nconc (loop for x being the external-symbols of package collect (list x (package-name (symbol-package x)))))))))'
+  "(progn (defconstant +blink-function+ 3) (defconstant +blink-variable+ 6) (defun ensure-list (thing) (if (listp thing) thing (list thing))) (defun present-symbols-list (package) (loop for x being the present-symbols of package collect x)) (defun external-symbols-list (package &key exclude) (let ((exclusions (ensure-list exclude))) (loop for package in (remove-if #'(lambda (p) (some #'(lambda (e) (eql p (find-package e))) exclusions)) (package-use-list package)) nconc (loop for x being the external-symbols of package collect x)))) (defun symbol-description (symbol) (let ((description (with-output-to-string (string) (describe symbol string)))) (subseq description (or (search \"names\" description) (length description))))) (defun symbol-info-list (symbol) (list :symbol (symbol-name symbol) :package (package-name (symbol-package symbol)) :documentation (symbol-description symbol) :functionp (or (fboundp symbol) (macro-function symbol)) :variablep (boundp symbol))) (defun symbol-info->lua-table (info) (let* ((symbol (getf info :symbol)) (package (getf info :package)) (documentation (getf info :documentation)) (functionp (getf info :functionp)) (variablep (getf info :variablep)) (type (cond (functionp +blink-function+) (variablep +blink-variable+) (t nil)))) (format nil \"{ label = ~('~a'~), detail = ~('~a'~), documentation = [[~a]]~@[, kind = ~d~] }\" symbol package documentation type))) (defun get-package-symbol-info (package) (unless (eql package (find-package :cl-user)) (mapcar #'symbol-info-list (nconc (present-symbols-list package) (external-symbols-list package :exclude :cl))))) (format nil \"~{~a~^ ~}\" (mapcar #'symbol-info->lua-table (get-package-symbol-info *package*))))"
 
---- TODO: Format directly to lua tables and load()!! Would be very nice. Then we can have additional logic like fboundp, describe, etc, to have much more information that we can easily work with here!
 vim.keymap.set('n', '<leader>ac', function()
   vim.api.nvim_cmd({ cmd = 'ConjureEval', args = { program } }, {})
   vim.api.nvim_create_autocmd({ 'User' }, {
@@ -137,18 +131,10 @@ vim.keymap.set('n', '<leader>ac', function()
           return
         end
 
-        local symbols = string_to_lisp_symbol_pair_list(result_string)
+        local symbol_items = string_to_items(result_string)
         local items = Lispdef_items
 
-        local blink_types = require 'blink.cmp.types'
-        for _, pair in pairs(symbols) do
-          local sym, pkg = pair_to_values(pair)
-          --- @type lsp.CompletionItem
-          local item = {
-            label = sym,
-            kind = blink_types.CompletionItemKind.Function,
-            detail = string.format('package: %s', pkg),
-          }
+        for _, item in pairs(symbol_items) do
           table.insert(items, item)
         end
       end)
