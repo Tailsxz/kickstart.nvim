@@ -2,27 +2,10 @@
 --- @class blink.cmp.Source
 local lisp_funcs = require 'lispdefs.lisp_funcs'
 local lisp_variables = require 'lispdefs.lisp_variables'
-local blink_types = require 'blink.cmp.types'
 local source = {}
 
----@param dest lsp.CompletionItem[]
----@param entries string[]
----@param type number
-local function insert_entries_as_type(dest, entries, type)
-  for _, v in pairs(entries) do
-    --- @type lsp.CompletionItem
-    local item = {
-      label = v,
-      kind = type,
-    }
-    table.insert(dest, item)
-  end
-end
-
---- @type lsp.CompletionItem[]
-local items = Lispdef_items
-insert_entries_as_type(items, lisp_funcs, blink_types.CompletionItemKind.Function)
-insert_entries_as_type(items, lisp_variables, blink_types.CompletionItemKind.Variable)
+vim.list_extend(Lispdef_items, lisp_funcs)
+vim.list_extend(Lispdef_items, lisp_variables)
 
 function source.new(opts)
   local self = setmetatable({}, { __index = source })
@@ -42,19 +25,16 @@ function source:get_completions(_, callback)
   local hash = {}
   local unique_items = {}
   ---@type table
-  for _, v in pairs(items) do
+  for _, v in ipairs(Lispdef_items) do
     local sym = v['label']
     if not hash[sym] then
       hash[sym] = true
       table.insert(unique_items, v)
     end
   end
-
   Lispdef_items = unique_items
-  items = unique_items
-
   callback {
-    items = items,
+    items = Lispdef_items,
     is_incomplete_backward = true,
     is_incomplete_forward = true,
   }
