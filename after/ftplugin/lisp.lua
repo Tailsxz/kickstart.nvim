@@ -102,20 +102,7 @@ vim.keymap.set('n', '<leader>lw', function()
   end
 end, { desc = 'Add symbol to lispwords.', remap = true })
 
----@param string string
-local function string_to_items(string)
-  local dict = {}
-  for item_string in string:gmatch '%b{}' do
-    local _, program = pcall(load, 'return ' .. item_string)
-    if program then
-      table.insert(dict, program())
-    end
-  end
-  return dict
-end
-
-local program =
-  "(progn (defconstant +blink-function+ 3) (defconstant +blink-variable+ 6) (defun ensure-list (thing) (if (listp thing) thing (list thing))) (defun present-symbols-list (package) (loop for x being the present-symbols of package collect x)) (defun external-symbols-list (package &key exclude) (let ((exclusions (ensure-list exclude))) (loop for package in (remove-if #'(lambda (p) (some #'(lambda (e) (eql p (find-package e))) exclusions)) (package-use-list package)) nconc (loop for x being the external-symbols of package collect x)))) (defun symbol-description (symbol) (let ((description (with-output-to-string (string) (describe symbol string)))) (subseq description (or (search \"names\" description) (length description))))) (defun symbol-info-list (symbol) (list :symbol (symbol-name symbol) :package (package-name (symbol-package symbol)) :documentation (symbol-description symbol) :functionp (or (fboundp symbol) (macro-function symbol)) :variablep (boundp symbol))) (defun symbol-info->lua-table (info) (let* ((symbol (getf info :symbol)) (package (getf info :package)) (documentation (getf info :documentation)) (functionp (getf info :functionp)) (variablep (getf info :variablep)) (type (cond (functionp +blink-function+) (variablep +blink-variable+) (t nil)))) (format nil \"{ label = ~('~a'~), detail = ~('~a'~), documentation = [[~a]]~@[, kind = ~d~] }\" symbol package documentation type))) (defun get-package-symbol-info (package) (unless (eql package (find-package :cl-user)) (mapcar #'symbol-info-list (nconc (present-symbols-list package) (external-symbols-list package :exclude :cl))))) (format nil \"~{~a~^ ~}\" (mapcar #'symbol-info->lua-table (get-package-symbol-info *package*))))"
+local program = '(progn (load "lua-symbols/load.lisp") (load "gen.lisp") \'exported!)'
 
 vim.keymap.set('n', '<leader>ac', function()
   vim.api.nvim_cmd({ cmd = 'ConjureEval', args = { program } }, {})
@@ -125,16 +112,19 @@ vim.keymap.set('n', '<leader>ac', function()
     callback = function(_)
       --- required as it doesn't seem that after the ConjureEval event, which is said to fire after evaluation of any form, that the contents are placed in the clipboard immediately. Even with the schedule it is inconsistent.
       vim.schedule(function()
-        local result_string = (vim.fn.getreg 'c'):match '"(.*)"'
-
-        if result_string == nil or result_string:sub(0, 1) ~= '{' then
+        local success, symbol_items = pcall(dofile, '/tmp/lisp/lisp_symbols.lua')
+        if not success then
+          error "lisp_symbols.lua doesn't exist..."
           return
         end
 
-        local symbol_items = string_to_items(result_string)
         local items = Lispdef_items
 
         for _, item in pairs(symbol_items) do
+          local kind = item['kind']
+          if kind == 3 then
+            vim.opt.lispwords:append(item['label'])
+          end
           table.insert(items, item)
         end
       end)
