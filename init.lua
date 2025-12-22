@@ -171,31 +171,73 @@ vim.api.nvim_create_autocmd('FileType', {
     local Rule = require 'nvim-autopairs.rule'
     local cond = require 'nvim-autopairs.conds'
     local ts_cond = require 'nvim-autopairs.ts-conds'
-    ap.get_rules("'")[1].not_filetypes = { 'scheme', 'lisp', 'clojure' }
-    ap.get_rules('`')[1].not_filetypes = { 'scheme', 'lisp', 'clojure' }
+    for _, char in ipairs { "'", '`' } do
+      ap.get_rules(char)[1].not_filetypes = { 'scheme', 'lisp', 'clojure' }
+    end
 
     local function move_if_next_char_is(char)
       return function(os)
         return os.next_char == char
       end
     end
+
+    local function not_before_keywords(keywords)
+      return function(opts)
+        --- @type string
+        local line = opts.line
+        local col = opts.col
+        local before = line:sub(1, col - 1)
+        local delimiters = { '(', ' ' }
+
+        for i = string.len(before), 1, -1 do
+          if vim.tbl_contains(delimiters, before:sub(i, i)) then
+            return not vim.tbl_contains(keywords, before:sub(i + 1, col - 1))
+          end
+        end
+        -- also could just do, now that we understand it, but we like our approach.
+        -- for _, kwd in ipairs(keywords) do
+        --   if cond.not_before_regex(kwd, string.len(kwd))(opts) == false then
+        --     return false
+        --   end
+        -- end
+      end
+    end
+
+    local function not_before_single(char)
+      return function(opts)
+        --- @type string
+        local line = opts.line
+        local col = opts.col
+        local before = line:sub(1, col - 1)
+        local delimiters = { '(', ' ' }
+
+        for i = string.len(before), 1, -1 do
+          if vim.tbl_contains(delimiters, before:sub(i, i)) then
+            if before:sub(i + 1, col - 1):match(char) then
+              return false
+            end
+          end
+        end
+      end
+    end
+
     local plus = '+'
     local asterisk = '*'
+    local kwds = { 'let', 'list', 'do', 'prog' }
     ap.add_rules {
       Rule(asterisk, asterisk, { 'lisp' })
-        :with_pair(cond.not_before_regex '%(')
-        :with_pair(cond.not_before_regex '1')
-        :with_pair(cond.not_before_regex 'let')
-        :with_pair(cond.not_before_regex 'list')
-        :with_pair(cond.not_inside_quote())
         :with_pair(ts_cond.is_not_ts_node { 'comment' })
+        :with_pair(cond.not_before_regex '%(')
+        :with_pair(not_before_single(asterisk))
+        :with_pair(not_before_keywords(kwds))
+        :with_pair(cond.not_inside_quote())
         :with_move(move_if_next_char_is(asterisk)),
       Rule(plus, plus, { 'lisp' })
+        :with_pair(ts_cond.is_not_ts_node { 'comment' })
         :with_pair(cond.not_before_regex '#')
         :with_pair(cond.not_before_regex '%(')
         :with_pair(cond.not_before_regex '1')
         :with_pair(cond.not_inside_quote())
-        :with_pair(ts_cond.is_not_ts_node { 'comment' })
         :with_move(move_if_next_char_is(plus)),
     }
   end,
