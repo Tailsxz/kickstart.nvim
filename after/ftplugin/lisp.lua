@@ -131,3 +131,7 @@ vim.keymap.set('n', '<leader>ac', function()
     end,
   })
 end, { desc = 'Adds all external and inherited symbols of the current *package* to the autocomplete lispdefs table.' })
+
+vim.keymap.set({ 'n', 'o', 'x' }, 'w', "<cmd>lua require('spider').motion('w')<CR>")
+vim.keymap.set({ 'n', 'o', 'x' }, 'e', "<cmd>lua require('spider').motion('e')<CR>")
+vim.keymap.set({ 'n', 'o', 'x' }, 'b', "<cmd>lua require('spider').motion('b')<CR>")
