@@ -102,7 +102,7 @@ vim.keymap.set('n', '<leader>lw', function()
   end
 end, { desc = 'Add symbol to lispwords.', remap = true })
 
-local program = '(progn (load "lua-symbols/load.lisp") (load "gen.lisp") \'exported!)'
+local program = '(progn (asdf:load-system "lua-symbols") (load "~/projects/lisp/gen.lisp") \'exported!)'
 
 vim.keymap.set('n', '<leader>ac', function()
   vim.api.nvim_cmd({ cmd = 'ConjureEval', args = { program } }, {})
@@ -114,7 +114,7 @@ vim.keymap.set('n', '<leader>ac', function()
       vim.schedule(function()
         local success, symbol_items = pcall(dofile, '/tmp/lisp/lisp_symbols.lua')
         if not success then
-          error "lisp_symbols.lua doesn't exist..."
+          error "Something wen't wrong while trying to read from lisp_symbols.lua..."
           return
         end
 
