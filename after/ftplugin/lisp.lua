@@ -1,6 +1,7 @@
 vim.opt_local.expandtab = true
 vim.opt_local.softtabstop = 2
 vim.opt_local.shiftwidth = 2
+vim.opt.lispwords:append 'defgeneric'
 
 --- Searches up the tree of a node in an attempt to find the node which is a direct child of the root node, source, and returns it. This will be the list_lit node in the context of searching within a definition form. I.e. (defmacro foo () ...)
 ---
@@ -111,10 +112,10 @@ vim.keymap.set('n', '<leader>ac', function()
     once = true,
     callback = function(_)
       --- required as it doesn't seem that after the ConjureEval event, which is said to fire after evaluation of any form, that the contents are placed in the clipboard immediately. Even with the schedule it is inconsistent.
-      vim.schedule(function()
+      vim.defer_fn(function()
         local success, symbol_items = pcall(dofile, '/tmp/lisp/lisp_symbols.lua')
         if not success then
-          error "Something wen't wrong while trying to read from lisp_symbols.lua..."
+          error 'Something went wrong while trying to read from lisp_symbols.lua...'
           return
         end
 
@@ -127,7 +128,7 @@ vim.keymap.set('n', '<leader>ac', function()
           end
           table.insert(items, item)
         end
-      end)
+      end, 200)
     end,
   })
 end, { desc = 'Adds all external and inherited symbols of the current *package* to the autocomplete lispdefs table.' })
